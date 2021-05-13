@@ -1,0 +1,11 @@
+{
+  "name": "scribe-afrique-server",
+  "version": "1.0.0",
+  "description": "A backend api for scribe-afrique blog site",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Romaric Zounlome",
+  "license": "MIT"
+}
