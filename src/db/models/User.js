@@ -6,6 +6,8 @@ const userSchema = new Mongoose.Schema(
     username: { type: String, unique: true, required: 'Username is required' },
     password: { type: String, required: 'password is required' },
     role: { type: String, default: 'USER' },
+    avatar: { type: String },
+    post: [{ type: Mongoose.Schema.Types.ObjectId, ref: 'Post' }],
   },
   { timestamps: true }
 );

@@ -1,19 +1,28 @@
-import dotenv from 'dotenv';
-import mongoose from 'mongoose';
+import { ApolloServer } from 'apollo-server-express';
+import cors from 'cors';
+import express from 'express';
+import db from './db';
+import User from './db/models/User';
+import Post from './db/models/Post';
 
-dotenv.config();
+const app = express();
 
-const db = () => {
-  try {
-    mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('connected to db');
-  } catch (error) {
-    console.error(error);
-    return new Error('Unable to connected to DB');
-  }
-};
+app.use(cors());
+app.use(express.json());
+const PORT = process.env.PORT || 4000;
 
-export default db;
+const apolloServer = new ApolloServer({
+  typeDefs,
+  resolvers: {
+    Query,
+    Mutation,
+  },
+  context: { models: { User, Post } },
+});
+
+apolloServer.applyMiddleware({ app, path: `/graphql` });
+
+app.listen(PORT, () => {
+  db();
+  console.info(`Server started on port ${PORT}`);
+});

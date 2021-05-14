@@ -4,7 +4,8 @@
   "description": "A backend api for scribe-afrique blog site",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/index.js --ext js,graphql --exec babel-node"
   },
   "author": "Romaric Zounlome",
   "license": "MIT",
