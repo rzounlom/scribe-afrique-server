@@ -4,6 +4,9 @@ import express from 'express';
 import db from './db';
 import User from './db/models/User';
 import Post from './db/models/Post';
+import typeDefs from './schema/schema';
+import Query from './resolvers/Query';
+import Mutation from './resolvers/Mutation';
 
 const app = express();
 

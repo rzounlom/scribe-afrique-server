@@ -20,7 +20,18 @@ const Query = {
       throw new Error('Invalid Credentials');
     }
 
-    const token = generateToken(user._id);
+    const token = generateToken(user);
     return { token };
   },
+  users: async (parent, args, { models: { User } }, info) => {
+    const users = await User.find({});
+    console.log(users);
+    return users;
+  },
+  user: async (parent, { id }, { models: { User } }, info) => {
+    const user = await User.findById(id);
+    return user;
+  },
 };
+
+export default Query;

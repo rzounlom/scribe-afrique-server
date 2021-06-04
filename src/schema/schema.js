@@ -4,6 +4,7 @@ const typeDefs = gql`
   type Query {
     #User queries
     user(id: ID!): User
+    users: [User]!
     loginUser(data: LoginUserInput): Token
 
     #Post queries
@@ -54,16 +55,18 @@ const typeDefs = gql`
     token: String!
   }
 
-type: Post {
+  type Post {
     id: ID!
     author: User
     title: String
     description: String
     image: String
-}
+  }
 
   #  Message Type
   type Message {
     message: String!
   }
 `;
+
+export default typeDefs;
