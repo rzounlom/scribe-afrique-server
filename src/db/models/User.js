@@ -7,7 +7,7 @@ const userSchema = new Mongoose.Schema(
     password: { type: String, required: 'password is required' },
     role: { type: String, default: 'USER' },
     avatar: { type: String },
-    post: [{ type: Mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+    posts: [{ type: Mongoose.Schema.Types.ObjectId, ref: 'Post' }],
   },
   { timestamps: true }
 );

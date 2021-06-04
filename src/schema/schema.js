@@ -14,7 +14,7 @@ const typeDefs = gql`
   type Mutation {
     #User mutations
     createUser(data: CreateUserInput): Message!
-    updateUser(data: UpdateUserInput): Message!
+    updateUser(id: ID!, data: UpdateUserInput): Message!
     deleteUser(id: ID!): Message!
 
     #Post mutations
@@ -35,10 +35,9 @@ const typeDefs = gql`
   }
 
   input UpdateUserInput {
-    id: ID!
     username: String
     password: String
-    role: String
+    role: UserRole
   }
 
   input LoginUserInput {
@@ -49,6 +48,7 @@ const typeDefs = gql`
   enum UserRole {
     USER
     ADMIN
+    SUPER_ADMIN
   }
 
   type Token {
@@ -57,10 +57,10 @@ const typeDefs = gql`
 
   type Post {
     id: ID!
-    author: User
-    title: String
-    description: String
-    image: String
+    author: User!
+    title: String!
+    description: String!
+    image: String!
   }
 
   #  Message Type

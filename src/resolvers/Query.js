@@ -29,8 +29,12 @@ const Query = {
     return users;
   },
   user: async (parent, { id }, { models: { User } }, info) => {
-    const user = await User.findById(id);
-    return user;
+    try {
+      const user = await User.findById(id);
+      return user;
+    } catch (error) {
+      return new Error(error);
+    }
   },
 };
 
