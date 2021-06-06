@@ -20,6 +20,8 @@ const typeDefs = gql`
 
     #Post mutations
     createPost(data: createPostInput): Message!
+    updatePost(id: ID!, data: updatePostInput): Message!
+    deletePost(id: ID!): Message!
   }
 
   # USER Type
@@ -78,6 +80,13 @@ const typeDefs = gql`
     description: String!
     image: String!
     published: Boolean!
+  }
+
+  input updatePostInput {
+    title: String
+    description: String!
+    image: String!
+    published: Boolean
   }
 `;
 

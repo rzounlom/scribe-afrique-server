@@ -111,6 +111,64 @@ const Mutation = {
       throw new Error(error);
     }
   },
+  updatePost: async (
+    parent,
+    { id, data: { title, description, image, published } },
+    { models: { PostModel, UserModel } },
+    info
+  ) => {
+    //find post
+    const post = await PostModel.findById(id);
+    if (!post) {
+      throw new Error('Post does not exist');
+    }
+
+    try {
+      post.title = title && typeof title === 'string' ? title : post.title;
+      post.description =
+        description && typeof description === 'string'
+          ? description
+          : post.description;
+      post.image = image && typeof image === 'string' ? image : post.image;
+      post.published =
+        published && typeof published === 'boolean'
+          ? published
+          : post.published;
+
+      await post.save();
+      return { message: 'Post successfully updated' };
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
+  },
+  deletePost: async (
+    parent,
+    { id },
+    { models: { UserModel, PostModel } },
+    info
+  ) => {
+    try {
+      //check if post exists
+      const post = await PostModel.findById(id);
+      if (!post) {
+        throw new Error('Post not found');
+      }
+      //find author post belongs to
+      const user = await UserModel.findById(post.author);
+      user.posts = user.posts.filter(
+        (post) => post.id.toString() !== id.toString()
+      );
+      await user.save();
+      await PostModel.deleteOne({ _id: id });
+      return {
+        message: `Post surccessfully deleted`,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
+  },
 };
 
 export default Mutation;
