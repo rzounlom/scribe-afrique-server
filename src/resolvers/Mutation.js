@@ -88,7 +88,6 @@ const Mutation = {
   ) => {
     //check if author exists
     const authorExists = await UserModel.findById(author);
-    console.log(author);
 
     if (!authorExists) {
       return new Error('Author does not exist');
@@ -104,7 +103,6 @@ const Mutation = {
       });
 
       await post.save();
-      console.log(post);
       return { message: 'Post successfully created' };
     } catch (error) {
       console.log(error);
