@@ -2,11 +2,12 @@ import { ApolloServer } from 'apollo-server-express';
 import cors from 'cors';
 import express from 'express';
 import db from './db';
-import User from './db/models/User';
-import Post from './db/models/Post';
+import UserModel from './db/models/User';
+import PostModel from './db/models/Post';
 import typeDefs from './schema/schema';
 import Query from './resolvers/Query';
 import Mutation from './resolvers/Mutation';
+import User from './resolvers/User';
 
 const app = express();
 
@@ -19,8 +20,9 @@ const apolloServer = new ApolloServer({
   resolvers: {
     Query,
     Mutation,
+    User,
   },
-  context: { models: { User, Post } },
+  context: { models: { PostModel, UserModel } },
 });
 
 apolloServer.applyMiddleware({ app, path: `/graphql` });

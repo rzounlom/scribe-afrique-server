@@ -1,12 +1,12 @@
 const Mutation = {
-  //**User Mutations */
+  //User Mutations/
   createUser: async (
     parent,
     { data: { username, password, role } },
-    { models: { User } },
+    { models: { UserModel } },
     info
   ) => {
-    const userExists = await User.findOne({ username: username });
+    const userExists = await UserModel.findOne({ username: username });
 
     //handle error if email is already taken
     if (userExists) {
@@ -27,19 +27,19 @@ const Mutation = {
       return { message: `New user ${newUser.username} successfully created` };
     } catch (error) {
       if (error) {
-        throw new Error(error.message);
+        throw new Error(error);
       }
     }
   },
   updateUser: async (
     parent,
     { id, data: { username, password, role } },
-    { models: { User } },
+    { models: { UserModel } },
     info
   ) => {
     try {
       //find user
-      const user = await User.findById(id);
+      const user = await UserModel.findById(id);
       //check if user exists
       if (!user) {
         throw new Error('User not found');
@@ -64,27 +64,53 @@ const Mutation = {
       return new Error(error);
     }
   },
-  deleteUser: async (parent, { id }, { models: { User } }, info) => {
+  deleteUser: async (parent, { id }, { models: { UserModel } }, info) => {
     try {
       //ensure id is passed
       if (!id) {
         throw new Error('User Id is required');
       }
 
-      await User.deleteOne({ _id: id });
+      await UserModel.deleteOne({ _id: id });
 
       return { message: `User successfully removed` };
     } catch (error) {
-      return new Error(error.message);
+      return new Error(error);
     }
   },
+
   //**Post Mutations */
   createPost: async (
     parent,
-    { author },
-    { models: { User, Post } },
+    { data: { author, title, description, image, published } },
+    { models: { PostModel, UserModel } },
     info
-  ) => {},
+  ) => {
+    //check if author exists
+    const authorExists = await UserModel.findById(author);
+    console.log(author);
+
+    if (!authorExists) {
+      return new Error('Author does not exist');
+    }
+
+    try {
+      const post = new PostModel({
+        author,
+        title,
+        description,
+        image,
+        published,
+      });
+
+      await post.save();
+      console.log(post);
+      return { message: 'Post successfully created' };
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
+  },
 };
 
 export default Mutation;

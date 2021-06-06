@@ -9,6 +9,7 @@ const typeDefs = gql`
 
     #Post queries
     post(id: ID!): Post
+    posts: [Post]!
   }
 
   type Mutation {
