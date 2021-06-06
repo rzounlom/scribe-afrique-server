@@ -1,10 +1,11 @@
-import Post from '../db/models/User';
-
 const User = {
-  posts: async (parent, args, ctx, info) => {
+  posts: async (parent, args, { models: { PostModel } }, info) => {
     try {
-      const posts = await Post.find({});
-      return posts.filter((post) => post.author === parent.id);
+      const posts = await PostModel.find({});
+      const userPosts = posts.filter(
+        (post) => post.author.toString() === parent.id.toString()
+      );
+      return userPosts;
     } catch (error) {
       console.log(error);
       throw new Error(error);

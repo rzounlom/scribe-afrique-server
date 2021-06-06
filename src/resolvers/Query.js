@@ -27,7 +27,6 @@ const Query = {
   },
   users: async (parent, args, { models: { UserModel } }, info) => {
     const users = await UserModel.find({});
-    console.log(users);
     return users;
   },
   user: async (parent, { id }, { models: { UserModel } }, info) => {
