@@ -18,6 +18,7 @@ const typeDefs = gql`
     deleteUser(id: ID!): Message!
 
     #Post mutations
+    createPost(data: createPostInput): Message!
   }
 
   # USER Type
@@ -55,17 +56,27 @@ const typeDefs = gql`
     token: String!
   }
 
+  #  Message Type
+  type Message {
+    message: String!
+  }
+
+  #  Post Type
   type Post {
     id: ID!
     author: User!
     title: String!
     description: String!
     image: String!
+    published: Boolean!
   }
 
-  #  Message Type
-  type Message {
-    message: String!
+  input createPostInput {
+    author: ID!
+    title: String!
+    description: String!
+    image: String!
+    published: Boolean!
   }
 `;
 

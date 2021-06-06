@@ -1,4 +1,5 @@
 const Mutation = {
+  //**User Mutations */
   createUser: async (
     parent,
     { data: { username, password, role } },
@@ -26,8 +27,7 @@ const Mutation = {
       return { message: `New user ${newUser.username} successfully created` };
     } catch (error) {
       if (error) {
-        console.log(error);
-        throw new Error(error);
+        throw new Error(error.message);
       }
     }
   },
@@ -58,13 +58,33 @@ const Mutation = {
 
       //save user
       await user.save();
-      console.log(user);
+
       return { message: `User ${currentUsername} updated` };
     } catch (error) {
-      console.log(error);
       return new Error(error);
     }
   },
+  deleteUser: async (parent, { id }, { models: { User } }, info) => {
+    try {
+      //ensure id is passed
+      if (!id) {
+        throw new Error('User Id is required');
+      }
+
+      await User.deleteOne({ _id: id });
+
+      return { message: `User successfully removed` };
+    } catch (error) {
+      return new Error(error.message);
+    }
+  },
+  //**Post Mutations */
+  createPost: async (
+    parent,
+    { author },
+    { models: { User, Post } },
+    info
+  ) => {},
 };
 
 export default Mutation;
