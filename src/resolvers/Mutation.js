@@ -1,5 +1,28 @@
+import bcrypt from 'bcrypt';
+import generateToken from '../utils/generateToken';
+
 const Mutation = {
   //User Mutations/
+  loginUser: async (
+    parent,
+    { data: { username, password } },
+    { models: { UserModel } },
+    info
+  ) => {
+    const user = await UserModel.findOne({ username: username });
+
+    //check if passwords match
+    const passwordsMatch = bcrypt.compareSync(password, user.password);
+
+    if (!passwordsMatch) {
+      throw new Error('Invalid Credentials');
+    }
+    const token = generateToken(user);
+    return {
+      token,
+    };
+  },
+
   createUser: async (
     parent,
     { data: { username, password, role } },

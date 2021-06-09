@@ -1,9 +1,16 @@
 import jwt from 'jsonwebtoken';
 
 const generateToken = (user) => {
-  return jwt.sign({ user }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
-  });
+  const { id, role } = user;
+  return jwt.sign(
+    { 'http://localhost/graphql': { role } },
+    process.env.JWT_SECRET,
+    {
+      algorithm: 'HS256',
+      subject: id,
+      expiresIn: '1d',
+    }
+  );
 };
 
 export default generateToken;

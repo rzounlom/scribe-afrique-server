@@ -1,30 +1,16 @@
-import generateToken from '../utils/generateToken';
-import bcrypt from 'bcrypt';
-
 const Query = {
-  //User Queries
-
-  loginUser: async (
-    parent,
-    { data: { username, password } },
-    { models: { UserModel } },
-    info
-  ) => {
-    const user = await UserModel.findOne({ username: username });
-    if (!user) {
-      throw new Error('Invalid Credentials');
+  //Viewer Query
+  me: async (parent, args, { user, models: { UserModel } }, info) => {
+    try {
+      console.log(user);
+      const me = await UserModel.findById(user.sub);
+      return me;
+    } catch (error) {
+      console.log(error);
+      throw new Error('You must be logged in');
     }
-
-    //check if passwords match
-    const passwordsMatch = bcrypt.compareSync(password, user.password);
-
-    if (!passwordsMatch) {
-      throw new Error('Invalid Credentials');
-    }
-
-    const token = generateToken(user);
-    return { token };
   },
+  //User Queries
   users: async (parent, args, { models: { UserModel } }, info) => {
     const users = await UserModel.find({});
     return users;

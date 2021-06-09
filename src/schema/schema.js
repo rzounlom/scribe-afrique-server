@@ -5,7 +5,7 @@ const typeDefs = gql`
     #User queries
     user(id: ID!): User
     users: [User]!
-    loginUser(data: LoginUserInput): Token
+    me: User!
 
     #Post queries
     post(id: ID!): Post
@@ -14,6 +14,7 @@ const typeDefs = gql`
 
   type Mutation {
     #User mutations
+    loginUser(data: LoginUserInput): Token!
     createUser(data: CreateUserInput): Message!
     updateUser(id: ID!, data: UpdateUserInput): Message!
     deleteUser(id: ID!): Message!
