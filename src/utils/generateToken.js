@@ -3,12 +3,12 @@ import jwt from 'jsonwebtoken';
 const generateToken = (user) => {
   const { id, role } = user;
   return jwt.sign(
-    { 'http://localhost/graphql': { role } },
+    { 'http://localhost:4000/graphql': { role } },
     process.env.JWT_SECRET,
     {
       algorithm: 'HS256',
       subject: id,
-      expiresIn: '1d',
+      expiresIn: '30d',
     }
   );
 };

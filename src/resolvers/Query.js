@@ -1,6 +1,7 @@
 const Query = {
   //Viewer Query
   me: async (parent, args, { user, models: { UserModel } }, info) => {
+    console.log('user: ', user);
     try {
       console.log(user);
       const me = await UserModel.findById(user.sub);

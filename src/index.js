@@ -1,14 +1,11 @@
 import { ApolloServer } from 'apollo-server-express';
-import Mutation from './resolvers/Mutation';
-import Post from './resolvers/Post';
 import PostModel from './db/models/PostModel';
-import Query from './resolvers/Query';
-import User from './resolvers/User';
 import UserModel from './db/models/UserModel';
 import cors from 'cors';
 import db from './db';
 import express from 'express';
 import expressJwt from 'express-jwt';
+import resolvers from './resolvers';
 import typeDefs from './schema/schema';
 
 const app = express();
@@ -18,28 +15,34 @@ app.use(express.json());
 app.use(
   expressJwt({
     secret: process.env.JWT_SECRET,
-    algorithms: ['HS256'],
     credentialsRequired: false,
+    algorithms: ['HS256'],
+    getToken: function fromHeaderOrQuerystring(req) {
+      if (
+        req.headers.authorization &&
+        req.headers.authorization.split(' ')[0] === 'Bearer'
+      ) {
+        return req.headers.authorization.split(' ')[1];
+      } else if (req.query && req.query.token) {
+        return req.query.token;
+      }
+      return null;
+    },
   })
 );
 
 const PORT = process.env.PORT || 4000;
 
-const apolloServer = new ApolloServer({
+const server = new ApolloServer({
   typeDefs,
-  resolvers: {
-    Query,
-    Mutation,
-    User,
-    Post,
-  },
+  resolvers,
   context: ({ req }) => {
     const user = req.user || null;
     return { user, models: { PostModel, UserModel } };
   },
 });
 
-apolloServer.applyMiddleware({ app, path: `/graphql` });
+server.applyMiddleware({ app, path: `/graphql` });
 
 app.listen(PORT, () => {
   db();

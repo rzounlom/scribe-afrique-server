@@ -6,38 +6,44 @@ const Mutation = {
   loginUser: async (
     parent,
     { data: { username, password } },
-    { models: { UserModel } },
+    { user, models: { UserModel } },
     info
   ) => {
-    const user = await UserModel.findOne({ username: username });
+    try {
+      const foundUser = await UserModel.findOne({ username: username });
+      //check if user exists
+      if (!foundUser) {
+        throw new Error('Invalid Credentials');
+      }
+      //check if passwords match
+      const passwordsMatch = bcrypt.compareSync(password, foundUser.password);
 
-    //check if passwords match
-    const passwordsMatch = bcrypt.compareSync(password, user.password);
-
-    if (!passwordsMatch) {
-      throw new Error('Invalid Credentials');
+      if (!passwordsMatch) {
+        throw new Error('Invalid Credentials');
+      }
+      const token = generateToken(foundUser);
+      return {
+        token,
+      };
+    } catch (e) {
+      throw new Error(e.message);
     }
-    const token = generateToken(user);
-    return {
-      token,
-    };
   },
 
   createUser: async (
     parent,
     { data: { username, password, role } },
-    { models: { UserModel } },
+    { user, models: { UserModel } },
     info
   ) => {
     const userExists = await UserModel.findOne({ username: username });
-
     //handle error if email is already taken
     if (userExists) {
       throw new Error('Username already in use');
     }
 
     //create new user object to add to db
-    const user = new User({
+    const newUser = new UserModel({
       username,
       password,
       role,
@@ -45,7 +51,7 @@ const Mutation = {
 
     try {
       //save user to db
-      const newUser = await user.save();
+      await newUser.save();
       //return user to client
       return { message: `New user ${newUser.username} successfully created` };
     } catch (error) {
@@ -57,37 +63,41 @@ const Mutation = {
   updateUser: async (
     parent,
     { id, data: { username, password, role } },
-    { models: { UserModel } },
+    { user, models: { UserModel } },
     info
   ) => {
     try {
       //find user
-      const user = await UserModel.findById(id);
+      const foundUser = await UserModel.findById(id);
       //check if user exists
-      if (!user) {
+      if (!foundUser) {
         throw new Error('User not found');
       }
 
-      const currentUsername = user.username;
+      const currentUsername = foundUser.username;
 
       //check values to update match types
-      user.username =
-        username && typeof username === 'string' ? username : user.username;
+      foundUser.username =
+        username && typeof username === 'string'
+          ? username
+          : foundUser.username;
 
-      user.password =
-        password && typeof password === 'string' ? password : user.password;
+      foundUser.password =
+        password && typeof password === 'string'
+          ? password
+          : foundUser.password;
 
-      user.role = role && typeof role === 'string' ? role : user.role;
+      foundUser.role = role && typeof role === 'string' ? role : foundUser.role;
 
       //save user
-      await user.save();
+      await foundUser.save();
 
       return { message: `User ${currentUsername} updated` };
     } catch (error) {
       return new Error(error);
     }
   },
-  deleteUser: async (parent, { id }, { models: { UserModel } }, info) => {
+  deleteUser: async (parent, { id }, { user, models: { UserModel } }, info) => {
     try {
       //ensure id is passed
       if (!id) {
@@ -106,7 +116,7 @@ const Mutation = {
   createPost: async (
     parent,
     { data: { author, title, description, image, published } },
-    { models: { PostModel, UserModel } },
+    { user, models: { PostModel, UserModel } },
     info
   ) => {
     //check if author exists
@@ -135,7 +145,7 @@ const Mutation = {
   updatePost: async (
     parent,
     { id, data: { title, description, image, published } },
-    { models: { PostModel, UserModel } },
+    { user, models: { PostModel, UserModel } },
     info
   ) => {
     //find post
@@ -166,7 +176,7 @@ const Mutation = {
   deletePost: async (
     parent,
     { id },
-    { models: { UserModel, PostModel } },
+    { user, models: { UserModel, PostModel } },
     info
   ) => {
     try {
@@ -176,11 +186,11 @@ const Mutation = {
         throw new Error('Post not found');
       }
       //find author post belongs to
-      const user = await UserModel.findById(post.author);
-      user.posts = user.posts.filter(
+      const foundUser = await UserModel.findById(post.author);
+      foundUser.posts = foundUser.posts.filter(
         (post) => post.id.toString() !== id.toString()
       );
-      await user.save();
+      await foundUser.save();
       await PostModel.deleteOne({ _id: id });
       return {
         message: `Post surccessfully deleted`,
