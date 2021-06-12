@@ -145,18 +145,16 @@ const Mutation = {
   //**Post Mutations */
   createPost: async (
     parent,
-    { data: { author, title, description, image, published } },
+    { data: { title, description, image, published } },
     { user, models: { PostModel, UserModel } },
     info
   ) => {
-    //check if author exists
-    const authorExists = await UserModel.findById(author);
-
-    if (!authorExists) {
-      return new Error('Author does not exist');
+    if (!user) {
+      throw new Error('You must be logged in');
     }
 
     try {
+      const author = user.sub;
       const post = new PostModel({
         author,
         title,
@@ -175,9 +173,13 @@ const Mutation = {
   updatePost: async (
     parent,
     { id, data: { title, description, image, published } },
-    { user, models: { PostModel, UserModel } },
+    { user, models: { PostModel } },
     info
   ) => {
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
+
     //find post
     const post = await PostModel.findById(id);
     if (!post) {
@@ -185,19 +187,24 @@ const Mutation = {
     }
 
     try {
-      post.title = title && typeof title === 'string' ? title : post.title;
-      post.description =
-        description && typeof description === 'string'
-          ? description
-          : post.description;
-      post.image = image && typeof image === 'string' ? image : post.image;
-      post.published =
-        published && typeof published === 'boolean'
-          ? published
-          : post.published;
+      const userRole = user[constants.graphql_url_dev].role;
+      if (userRole === 'SUPER_ADMIN' || user.sub === post.author.toString()) {
+        post.title = title && typeof title === 'string' ? title : post.title;
+        post.description =
+          description && typeof description === 'string'
+            ? description
+            : post.description;
+        post.image = image && typeof image === 'string' ? image : post.image;
+        post.published =
+          published && typeof published === 'boolean'
+            ? published
+            : post.published;
 
-      await post.save();
-      return { message: 'Post successfully updated' };
+        await post.save();
+        return { message: 'Post successfully updated' };
+      } else {
+        throw new Error('Not Authorized');
+      }
     } catch (error) {
       console.log(error);
       throw new Error(error);
@@ -209,22 +216,32 @@ const Mutation = {
     { user, models: { UserModel, PostModel } },
     info
   ) => {
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
     try {
       //check if post exists
       const post = await PostModel.findById(id);
       if (!post) {
         throw new Error('Post not found');
       }
-      //find author post belongs to
-      const foundUser = await UserModel.findById(post.author);
-      foundUser.posts = foundUser.posts.filter(
-        (post) => post.id.toString() !== id.toString()
-      );
-      await foundUser.save();
-      await PostModel.deleteOne({ _id: id });
-      return {
-        message: `Post surccessfully deleted`,
-      };
+      const userRole = user[constants.graphql_url_dev].role;
+      if (userRole === 'SUPER_ADMIN' || user.sub === post.author.toString()) {
+        //find author post belongs to
+        const foundUser = await UserModel.findById(post.author);
+
+        //delete post from user's post array
+        foundUser.posts = foundUser.posts.filter(
+          (post) => post.id.toString() !== id.toString()
+        );
+        await foundUser.save();
+        await PostModel.deleteOne({ _id: id });
+        return {
+          message: `Post successfully deleted`,
+        };
+      } else {
+        throw new Error('Not Authorized');
+      }
     } catch (error) {
       console.log(error);
       throw new Error(error);

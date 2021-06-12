@@ -75,7 +75,6 @@ const typeDefs = gql`
   }
 
   input createPostInput {
-    author: ID!
     title: String!
     description: String!
     image: String!
