@@ -1,47 +1,69 @@
 const Query = {
   //Viewer Query
   me: async (parent, args, { user, models: { UserModel } }, info) => {
-    console.log('user: ', user);
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
     try {
-      console.log(user);
       const me = await UserModel.findById(user.sub);
+      if (!me) {
+        throw new Error('You must be logged in');
+      }
       return me;
     } catch (error) {
       console.log(error);
-      throw new Error('You must be logged in');
+      throw new Error(error.message);
     }
   },
   //User Queries
-  users: async (parent, args, { models: { UserModel } }, info) => {
-    const users = await UserModel.find({});
-    return users;
-  },
-  user: async (parent, { id }, { models: { UserModel } }, info) => {
+  users: async (parent, args, { user, models: { UserModel } }, info) => {
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
     try {
-      const user = await UserModel.findById(id);
-      return user;
+      const foudUsers = await UserModel.find({});
+      return foudUsers;
     } catch (error) {
-      return new Error(error);
+      console.log(error);
+      throw new Error(error.message);
+    }
+  },
+  user: async (parent, { id }, { user, models: { UserModel } }, info) => {
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
+    try {
+      const foundUser = await UserModel.findById(id);
+      return foundUser;
+    } catch (error) {
+      console.log(error);
+      throw new Error(error.message);
     }
   },
   //Post Queries
 
-  posts: async (parent, _, { models: { PostModel } }, info) => {
+  posts: async (parent, _, { user, models: { PostModel } }, info) => {
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
     try {
       const posts = await PostModel.find({});
       return posts;
     } catch (error) {
       console.log(error);
-      throw new Error(error);
+      throw new Error(error.message);
     }
   },
-  post: async (parent, { id }, { models: { PostModel } }, info) => {
+  post: async (parent, { id }, { user, models: { PostModel } }, info) => {
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
     try {
       const post = await PostModel.findById(id);
       return post;
     } catch (error) {
       console.log(error);
-      throw new Error(error);
+      throw new Error(error.message);
     }
   },
 };

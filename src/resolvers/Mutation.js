@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import constants from '../common/constants';
 import generateToken from '../utils/generateToken';
 
 const Mutation = {
@@ -36,6 +37,14 @@ const Mutation = {
     { user, models: { UserModel } },
     info
   ) => {
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
+
+    const userRole = user[constants.graphql_url_dev].role;
+    if (userRole !== 'SUPER_ADMIN') {
+      throw new Error('Not Authorized');
+    }
     const userExists = await UserModel.findOne({ username: username });
     //handle error if email is already taken
     if (userExists) {
@@ -66,6 +75,9 @@ const Mutation = {
     { user, models: { UserModel } },
     info
   ) => {
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
     try {
       //find user
       const foundUser = await UserModel.findById(id);
@@ -74,30 +86,48 @@ const Mutation = {
         throw new Error('User not found');
       }
 
-      const currentUsername = foundUser.username;
+      const userRole = user[constants.graphql_url_dev].role;
 
-      //check values to update match types
-      foundUser.username =
-        username && typeof username === 'string'
-          ? username
-          : foundUser.username;
+      if (userRole === 'SUPER_ADMIN' || foundUser.id === user.sub) {
+        const currentUsername = foundUser.username;
 
-      foundUser.password =
-        password && typeof password === 'string'
-          ? password
-          : foundUser.password;
+        //check values to update match types
+        foundUser.username =
+          username && typeof username === 'string'
+            ? username
+            : foundUser.username;
 
-      foundUser.role = role && typeof role === 'string' ? role : foundUser.role;
+        foundUser.password =
+          password && typeof password === 'string'
+            ? password
+            : foundUser.password;
 
-      //save user
-      await foundUser.save();
+        if (userRole === 'SUPER_ADMIN') {
+          foundUser.role == role && typeof role === 'string'
+            ? role
+            : foundUser.role;
+        } else {
+          foundUser.role = foundUser.role;
+        }
+        //save user
+        await foundUser.save();
 
-      return { message: `User ${currentUsername} updated` };
+        return { message: `User ${currentUsername} updated` };
+      } else {
+        throw new Error('Not Authorized');
+      }
     } catch (error) {
       return new Error(error);
     }
   },
   deleteUser: async (parent, { id }, { user, models: { UserModel } }, info) => {
+    if (!user) {
+      throw new Error('You must be logged  in');
+    }
+    const userRole = user[constants.graphql_url_dev].role;
+    if (userRole !== 'SUPER_ADMIN') {
+      throw new Error('Not Authorized');
+    }
     try {
       //ensure id is passed
       if (!id) {
