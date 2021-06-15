@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-import constants from '../common/constants';
 import generateToken from '../utils/generateToken';
 
 const Mutation = {
@@ -41,8 +40,7 @@ const Mutation = {
       throw new Error('You must be logged in');
     }
 
-    const userRole = user[constants.graphql_url_dev].role;
-    if (userRole !== 'SUPER_ADMIN') {
+    if (user.role !== 'SUPER_ADMIN') {
       throw new Error('Not Authorized');
     }
     const userExists = await UserModel.findOne({ username: username });
@@ -86,9 +84,7 @@ const Mutation = {
         throw new Error('User not found');
       }
 
-      const userRole = user[constants.graphql_url_dev].role;
-
-      if (userRole === 'SUPER_ADMIN' || foundUser.id === user.sub) {
+      if (user.role === 'SUPER_ADMIN' || foundUser.id === user.sub) {
         const currentUsername = foundUser.username;
 
         //check values to update match types
@@ -102,7 +98,7 @@ const Mutation = {
             ? password
             : foundUser.password;
 
-        if (userRole === 'SUPER_ADMIN') {
+        if (user.role === 'SUPER_ADMIN') {
           foundUser.role == role && typeof role === 'string'
             ? role
             : foundUser.role;
@@ -124,8 +120,8 @@ const Mutation = {
     if (!user) {
       throw new Error('You must be logged  in');
     }
-    const userRole = user[constants.graphql_url_dev].role;
-    if (userRole !== 'SUPER_ADMIN') {
+
+    if (user.role !== 'SUPER_ADMIN') {
       throw new Error('Not Authorized');
     }
     try {
@@ -187,8 +183,7 @@ const Mutation = {
     }
 
     try {
-      const userRole = user[constants.graphql_url_dev].role;
-      if (userRole === 'SUPER_ADMIN' || user.sub === post.author.toString()) {
+      if (user.role === 'SUPER_ADMIN' || user.sub === post.author.toString()) {
         post.title = title && typeof title === 'string' ? title : post.title;
         post.description =
           description && typeof description === 'string'
@@ -225,8 +220,8 @@ const Mutation = {
       if (!post) {
         throw new Error('Post not found');
       }
-      const userRole = user[constants.graphql_url_dev].role;
-      if (userRole === 'SUPER_ADMIN' || user.sub === post.author.toString()) {
+
+      if (user.role === 'SUPER_ADMIN' || user.sub === post.author.toString()) {
         //find author post belongs to
         const foundUser = await UserModel.findById(post.author);
 
