@@ -12,6 +12,5 @@ export const verifyJwt = (token) => {
       return decodedUser;
     }
   );
-  console.log('verifiedToken:  ', user);
   return user;
 };

@@ -20,12 +20,11 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req }) => {
-    console.log('req headers: ', req.headers.authorization);
     const token = req.headers.authorization
       ? req.headers.authorization.slice(7)
       : null;
     const user = verifyJwt(token) || null;
-    console.log('jwtUserVerified: ', user);
+    // console.log('jwtUserVerified: ', user);
     return { user, models: { PostModel, UserModel } };
   },
 });
