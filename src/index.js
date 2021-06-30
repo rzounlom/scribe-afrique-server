@@ -7,29 +7,12 @@ import express from 'express';
 import expressJwt from 'express-jwt';
 import resolvers from './resolvers';
 import typeDefs from './schema/schema';
+import { verifyJwt } from './utils/verifyJwt';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(
-  expressJwt({
-    secret: process.env.JWT_SECRET,
-    credentialsRequired: false,
-    algorithms: ['HS256'],
-    getToken: function fromHeaderOrQuerystring(req) {
-      if (
-        req.headers.authorization &&
-        req.headers.authorization.split(' ')[0] === 'Bearer'
-      ) {
-        return req.headers.authorization.split(' ')[1];
-      } else if (req.query && req.query.token) {
-        return req.query.token;
-      }
-      return null;
-    },
-  })
-);
 
 const PORT = process.env.PORT || 4000;
 
@@ -37,7 +20,12 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
   context: ({ req }) => {
-    const user = req.user || null;
+    console.log('req headers: ', req.headers.authorization);
+    const token = req.headers.authorization
+      ? req.headers.authorization.slice(7)
+      : null;
+    const user = verifyJwt(token) || null;
+    console.log('jwtUserVerified: ', user);
     return { user, models: { PostModel, UserModel } };
   },
 });

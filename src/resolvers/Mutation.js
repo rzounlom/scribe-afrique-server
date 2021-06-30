@@ -9,6 +9,7 @@ const Mutation = {
     { user, models: { UserModel } },
     info
   ) => {
+    console.log(user);
     try {
       const foundUser = await UserModel.findOne({ username: username });
       //check if user exists
