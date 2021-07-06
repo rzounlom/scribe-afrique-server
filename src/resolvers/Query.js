@@ -66,6 +66,28 @@ const Query = {
       throw new Error(error.message);
     }
   },
+  userPosts: async (
+    parent,
+    { type },
+    { user, models: { PostModel } },
+    info
+  ) => {
+    if (!user) {
+      throw new Error('You must be logged in');
+    }
+
+    const posts = await PostModel.find({ author: user.sub });
+    switch (type) {
+      case 'all':
+        return posts;
+      case 'published':
+        return posts.filter((post) => post.published);
+      case 'unpublished':
+        return posts.filter((post) => !post.published);
+      default:
+        return posts;
+    }
+  },
 };
 
 export default Query;

@@ -10,6 +10,7 @@ const typeDefs = gql`
     #Post queries
     post(id: ID!): Post
     posts: [Post]!
+    userPosts(type: String!): [Post]!
   }
 
   type Mutation {
